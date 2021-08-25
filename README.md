@@ -6,24 +6,31 @@ Download or clone the repository.
 
 To install prerequisite software:
 
-1. Install [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html])
+1. Install [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
 2. Install [Apache Maven](https://maven.apache.org/install.html) (or use your preferred IDE)
 3. Build and package the Java application in the software folder:
 
 ```bash
- cd software/ExampleFunction/
- mvn package
- cd ../../
+cd software/ExampleFunction/
+mvn package
 ```
 
-4. Synthesize CDK. This previews changes to your AWS account before it makes them:
+4. Zip the execution wrapper script:
 
 ```bash
- cd infrastructure
- cdk synth
+cd ../OptimizationLayer/
+./build-layer.sh
+cd ../../
 ```
 
-5. Deploy the Lambda functions:
+5. Synthesize CDK. This previews changes to your AWS account before it makes them:
+
+```bash
+cd infrastructure
+cdk synth
+```
+
+6. Deploy the Lambda functions:
 
 ```bash
 cdk deploy --outputs-file outputs.json
