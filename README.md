@@ -15,22 +15,14 @@ cd software/ExampleFunction/
 mvn package
 ```
 
-4. Zip the execution wrapper script:
-
-```bash
-cd ../OptimizationLayer/
-./build-layer.sh
-cd ../../
-```
-
-5. Synthesize CDK. This previews changes to your AWS account before it makes them:
+4. Synthesize CDK. This previews changes to your AWS account before it makes them:
 
 ```bash
 cd infrastructure
 cdk synth
 ```
 
-6. Deploy the Lambda functions:
+5. Deploy the Lambda functions:
 
 ```bash
 cdk deploy --outputs-file outputs.json
@@ -39,7 +31,7 @@ cdk deploy --outputs-file outputs.json
 The API Gateway endpoint URL is displayed in the output and saved in a file named outputs.json. The contents are similar to:
 
 ```
-InfrastructureStack.apiendpoint = https://{YOUR_UNIQUE_ID_HERE}.execute-api.eu-west-1.amazonaws.com
+ExampleTieredCompStack.apiendpoint = https://{YOUR_UNIQUE_ID_HERE}.execute-api.eu-west-1.amazonaws.com
 ```
 
 ## Using Artillery to load test the changes
@@ -50,8 +42,8 @@ First, install prerequisites:
 2. Run the following two scripts from the `/infrastructure` directory:
 
 ```bash
-artillery run -t $(cat outputs.json | jq -r '.InfrastructureStack.apiendpoint') -v '{ "url": "/without" }' loadtest.yml
-artillery run -t $(cat outputs.json | jq -r '.InfrastructureStack.apiendpoint') -v '{ "url": "/with" }' loadtest.yml
+artillery run -t $(cat outputs.json | jq -r '.ExampleTieredCompStack.apiendpoint') -v '{ "url": "/without" }' loadtest.yml
+artillery run -t $(cat outputs.json | jq -r '.ExampleTieredCompStack.apiendpoint') -v '{ "url": "/with" }' loadtest.yml
 ```
 
 ### Check results in Amazon CloudWatch Insights
@@ -61,8 +53,8 @@ artillery run -t $(cat outputs.json | jq -r '.InfrastructureStack.apiendpoint') 
 3. Select the following two log groups from the drop-down list:
 
 ```
-/aws/lambda/example-with-layer
-/aws/lambda/example-without-layer
+/aws/lambda/example-with-tiered-comp
+/aws/lambda/example-without-tiered-comp
 ```
 
 4. Copy the following query and choose **Run query**:

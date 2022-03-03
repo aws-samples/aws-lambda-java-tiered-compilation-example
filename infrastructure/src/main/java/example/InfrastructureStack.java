@@ -47,16 +47,9 @@ public class InfrastructureStack extends Stack {
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .build());
 
-        LayerVersion optimizationLayer = new LayerVersion(this, "OptimizationLayer", LayerVersionProps.builder()
-                .layerVersionName("OptimizationLayer")
-                .description("Enable tiered compilation")
-                .compatibleRuntimes(Arrays.asList(Runtime.JAVA_11, Runtime.JAVA_8_CORRETTO))
-                .code(Code.fromAsset("../software/OptimizationLayer/layer.zip"))
-                .build());
-
-        Function exampleWithoutLayer = new Function(this, "ExampleWithoutLayer", FunctionProps.builder()
-                .functionName("example-without-layer")
-                .description("example-without-layer")
+        Function exampleWithoutTieredComp = new Function(this, "ExampleWithoutTieredComp", FunctionProps.builder()
+                .functionName("example-without-tiered-comp")
+                .description("example-without-tiered-comp")
                 .handler("example.ExampleDynamoDbHandler::handleRequest")
                 .runtime(Runtime.JAVA_11)
                 .code(Code.fromAsset("../software/ExampleFunction/target/example.jar"))
@@ -66,22 +59,21 @@ public class InfrastructureStack extends Stack {
                 .logRetention(RetentionDays.ONE_WEEK)
                 .build());
 
-        Function exampleWithLayer = new Function(this, "ExampleWithLayer", FunctionProps.builder()
-                .functionName("example-with-layer")
-                .description("example-with-layer")
+        Function exampleWithTieredComp = new Function(this, "ExampleWithTieredComp", FunctionProps.builder()
+                .functionName("example-with-tiered-comp")
+                .description("example-with-tiered-comp")
                 .handler("example.ExampleDynamoDbHandler::handleRequest")
                 .runtime(Runtime.JAVA_11)
                 .code(Code.fromAsset("../software/ExampleFunction/target/example.jar"))
                 .memorySize(512)
                 .environment(mapOf("TABLE_NAME", exampleTable.getTableName(),
-                        "AWS_LAMBDA_EXEC_WRAPPER", "/opt/java-exec-wrapper"))
+                        "JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"))
                 .timeout(Duration.seconds(20))
                 .logRetention(RetentionDays.ONE_WEEK)
-                .layers(singletonList(optimizationLayer))
                 .build());
 
-        exampleTable.grantWriteData(exampleWithoutLayer);
-        exampleTable.grantWriteData(exampleWithLayer);
+        exampleTable.grantWriteData(exampleWithoutTieredComp);
+        exampleTable.grantWriteData(exampleWithTieredComp);
 
         HttpApi httpApi = new HttpApi(this, "ExampleApi", HttpApiProps.builder()
                 .apiName("ExampleApi")
@@ -91,7 +83,7 @@ public class InfrastructureStack extends Stack {
                 .path("/without")
                 .methods(singletonList(HttpMethod.GET))
                 .integration(new LambdaProxyIntegration(LambdaProxyIntegrationProps.builder()
-                        .handler(exampleWithoutLayer)
+                        .handler(exampleWithoutTieredComp)
                         .payloadFormatVersion(PayloadFormatVersion.VERSION_2_0)
                         .build()))
                 .build());
@@ -100,7 +92,7 @@ public class InfrastructureStack extends Stack {
                 .path("/with")
                 .methods(singletonList(HttpMethod.GET))
                 .integration(new LambdaProxyIntegration(LambdaProxyIntegrationProps.builder()
-                        .handler(exampleWithLayer)
+                        .handler(exampleWithTieredComp)
                         .payloadFormatVersion(PayloadFormatVersion.VERSION_2_0)
                         .build()))
                 .build());
