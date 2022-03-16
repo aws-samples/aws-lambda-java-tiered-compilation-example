@@ -6,7 +6,7 @@ public class InfrastructureApp {
     public static void main(final String[] args) {
         App app = new App();
 
-        new InfrastructureStack(app, "InfrastructureStack");
+        new InfrastructureStack(app, "ExampleTieredCompStack");
 
         app.synth();
     }
