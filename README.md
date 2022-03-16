@@ -30,8 +30,12 @@ cdk deploy --outputs-file outputs.json
 
 The API Gateway endpoint URL is displayed in the output and saved in a file named outputs.json. The contents are similar to:
 
-```
-ExampleTieredCompStack.apiendpoint = https://{YOUR_UNIQUE_ID_HERE}.execute-api.eu-west-1.amazonaws.com
+```json
+{
+  "ExampleTieredCompStack": {
+    "apiendpoint": "https://{YOUR_UNIQUE_ID_HERE}.execute-api.eu-west-1.amazonaws.com"
+  }
+}
 ```
 
 ## Using Artillery to load test the changes
